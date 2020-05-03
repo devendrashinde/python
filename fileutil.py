@@ -2,7 +2,9 @@ import io
 import sys
 import fileinput
 import shutil
-from os import listdir, walk
+import os
+import time
+from os import listdir, walk, path
 from os.path import isfile, join
 from pathlib import Path
 
@@ -18,26 +20,30 @@ def isInt(s):
 		return False
 		
 def getTargetDir(filename):
-	filename = filename.replace("IMG_", "")
-	filename = filename.replace("VID_", "")
-	if filename.find("-") > 0:
-		str = filename[filename.find("-"):]
-		filename = filename.replace(str, "")
+	filename = filename.replace("_", "")
+	filename = filename.replace("-", "")
+	filename = filename.replace("IMG", "")
+	filename = filename.replace("VID", "")
+	filename = filename.replace("Screenshot", "")
+	filename = filename.replace("Record", "")
+	print(filename)
 	if filename.find(".") > 0:
 		str = filename[filename.find("."):]
 		filename = filename.replace(str, "")
 		
 	dir = "others"
+	print(filename)
+	# extract year-month e.g. 202004
 	filename = filename[0:6]
-	filename = filename.replace("_", "")
 	print(filename)
 	if isInt(filename) :
 		year = filename[0:4]
-		month = filename[4:]
-		print(year)
-		print(month)
-		if int(month) <= 12:
-			dir = year +"-" + months[int(month)-1]
+		if int(year) > 1990:
+                        month = filename[4:]
+                        print(year)
+                        print(month)
+                        if int(month) <= 12:
+                                dir = year +"-" + months[int(month)-1]
 	return dir		
 
 def listFiles(srcDir, targetDir):
@@ -59,7 +65,14 @@ def listFiles(srcDir, targetDir):
 		for filename in filenames:
 			fullname = dirpath + "\\" + filename
 			print(fullname)
-			toDir = targetDir + "\\" + getTargetDir(filename)
+			
+			tDir = getTargetDir(filename)
+			if tDir == "others":
+                                mtime = time.ctime(os.path.getmtime(fullname))
+                                parts = mtime.split(" ")
+                                tDir = parts[len(parts)-1] + "-" + parts[1]
+                                   
+			toDir = targetDir + "\\" + tDir
 			Path(toDir).mkdir(parents=True, exist_ok=True)
 			shutil.move(fullname, toDir + "\\" + filename)	
 	
@@ -71,3 +84,4 @@ else:
 	srcDir = sys.argv[1]
 	targetDir = sys.argv[2]
 	listFiles(srcDir, targetDir)
+
