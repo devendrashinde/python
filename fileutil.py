@@ -21,7 +21,10 @@ def getTargetDir(filename):
 	filename = filename.replace("IMG_", "")
 	filename = filename.replace("VID_", "")
 	if filename.find("-") > 0:
-		str = filename[0:filename.find("-")+1]
+		str = filename[filename.find("-"):]
+		filename = filename.replace(str, "")
+	if filename.find(".") > 0:
+		str = filename[filename.find("."):]
 		filename = filename.replace(str, "")
 		
 	dir = "others"
@@ -33,7 +36,8 @@ def getTargetDir(filename):
 		month = filename[4:]
 		print(year)
 		print(month)
-		dir = year +"-" + months[int(month)-1]
+		if int(month) <= 12:
+			dir = year +"-" + months[int(month)-1]
 	return dir		
 
 def listFiles(srcDir, targetDir):
